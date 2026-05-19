@@ -10,17 +10,3 @@ blocks network requests to the following endpoints:
 - firebase (analytics)
 
 It also strips `sentry-trace` and `baggage` headers from allowed outgoing requests.
-
-## Build
-
-```sh
-make clean package
-```
-
-For local diagnostics:
-
-```sh
-make clean package DNT_DEBUG=1
-```
-
-The raw `DiscordNoTrack.dylib` can be injected into a decrypted Discord IPA with tools such as Feather. If you co-inject BTLoader, inject BTLoader with its resources and inject DiscordNoTrack as a plain extra dylib.
