@@ -12,7 +12,7 @@ jobs:
     name: Build dylib
     runs-on: macos-latest
     env:
-      THEOS: "${{ runner.temp }}/theos"
+      THEOS: /tmp/theos
       THEOS_PACKAGE_SCHEME: ""
 
     steps:
