@@ -1,7 +1,9 @@
 name: Build
 
-on:
+"on":
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -10,7 +12,7 @@ jobs:
     name: Build dylib
     runs-on: macos-latest
     env:
-      THEOS: ${{ runner.temp }}/theos
+      THEOS: "${{ runner.temp }}/theos"
       THEOS_PACKAGE_SCHEME: ""
 
     steps:
