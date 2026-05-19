@@ -23,6 +23,4 @@ For local diagnostics:
 make clean package DNT_DEBUG=1
 ```
 
-GitHub Actions builds `DiscordNoTrack.dylib` on macOS and uploads it as a workflow artifact.
-
 The raw `DiscordNoTrack.dylib` can be injected into a decrypted Discord IPA with tools such as Feather. If you co-inject BTLoader, inject BTLoader with its resources and inject DiscordNoTrack as a plain extra dylib.
