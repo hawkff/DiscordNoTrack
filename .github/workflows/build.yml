@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  dylib:
+    name: Build dylib
+    runs-on: macos-latest
+    env:
+      THEOS: ${{ runner.temp }}/theos
+      THEOS_PACKAGE_SCHEME: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install ldid
+
+      - name: Clone Theos
+        run: git clone --recursive --depth 1 https://github.com/theos/theos.git "$THEOS"
+
+      - name: Build tweak
+        run: |
+          make clean
+          make DNT_DEBUG=0
+
+      - name: Prepare dylib artifact
+        run: |
+          cp ".theos/obj/DiscordNoTrack.dylib" "DiscordNoTrack.dylib"
+          install_name_tool -id "@rpath/DiscordNoTrack.dylib" "DiscordNoTrack.dylib"
+          codesign -f -s - "DiscordNoTrack.dylib"
+          shasum -a 256 "DiscordNoTrack.dylib" > "DiscordNoTrack.dylib.sha256"
+          file "DiscordNoTrack.dylib"
+          otool -D "DiscordNoTrack.dylib"
+          otool -L "DiscordNoTrack.dylib"
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiscordNoTrack-dylib
+          path: |
+            DiscordNoTrack.dylib
+            DiscordNoTrack.dylib.sha256
+          if-no-files-found: error

@@ -1,2 +1,8 @@
-packages
-.theos
+packages/
+.theos/
+
+.DS_Store
+._*
+
+architecture.md
+*.dylib
