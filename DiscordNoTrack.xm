@@ -38,6 +38,12 @@ static NSURLRequest *DNTFiltered(NSURLRequest *request) {
     return DNTUnroutableRequest();
 }
 
+static NSURL *DNTFilteredURL(NSURL *url) {
+    if (!DNTIsTrackerHost(url)) { return url; }
+    DNTLog(@"blocking tracker host: %@", url.host);
+    return DNTUnroutableRequest().URL;
+}
+
 static BOOL DNTClassExists(NSString *className) {
     BOOL exists = NSClassFromString(className) != Nil;
     DNTLog(@"%@ %@", exists ? @"installing hooks for" : @"class not found:", className);
@@ -88,6 +94,15 @@ static BOOL DNTClassExists(NSString *className) {
 
 - (id)dataTaskWithRequest:(NSURLRequest *)request completionHandler:(id)handler {
     return %orig(DNTFiltered(request), handler);
+}
+
+- (id)dataTaskWithURL:(NSURL *)url completionHandler:(id)handler {
+    return %orig(DNTFilteredURL(url), handler);
+}
+
+// AppsFlyer's HTTP client sends its requests as download tasks
+- (id)downloadTaskWithRequest:(NSURLRequest *)request {
+    return %orig(DNTFiltered(request));
 }
 
 - (id)uploadTaskWithRequest:(NSURLRequest *)request fromData:(id)data {
