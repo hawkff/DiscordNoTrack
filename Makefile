@@ -9,7 +9,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = DiscordNoTrack
 
-$(TWEAK_NAME)_FILES = DiscordNoTrack.xm dummyDelegate.m
+$(TWEAK_NAME)_FILES = DiscordNoTrack.xm
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -DDNT_DEBUG=$(DNT_DEBUG)
 $(TWEAK_NAME)_LOGOS_DEFAULT_GENERATOR = internal
 
