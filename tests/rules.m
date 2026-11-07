@@ -36,6 +36,18 @@ int main(void) {
         assert([DNTWithoutTelemetryHeaders(headers) isEqualToDictionary:@{@"Authorization": @"token"}]);
         NSDictionary<NSString *, NSString *> *clean = @{@"Accept": @"*/*"};
         assert(DNTWithoutTelemetryHeaders(clean) == clean);
+
+        // RCTNetworking turns a non-HTTP response into status 200; Discord's HTTP layer then parses the {} body.
+        dispatch_semaphore_t done = dispatch_semaphore_create(0);
+        [[NSURLSession.sharedSession dataTaskWithURL:[NSURL URLWithString:DNTEmptyJSONURL] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+            assert(!error);
+            assert(![response isKindOfClass:NSHTTPURLResponse.class]);
+            assert([response.MIMEType isEqualToString:@"application/json"]);
+            assert([data isEqualToData:[@"{}" dataUsingEncoding:NSUTF8StringEncoding]]);
+            dispatch_semaphore_signal(done);
+        }] resume];
+        long timedOut = dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC));
+        assert(!timedOut);
     }
     puts("rules ok");
     return 0;

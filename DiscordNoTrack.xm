@@ -17,7 +17,7 @@ static NSURLRequest *DNTEmptyJSONRequest(void) {
     static NSURLRequest *request;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"data:application/json,%7B%7D"]];
+        request = [NSURLRequest requestWithURL:[NSURL URLWithString:DNTEmptyJSONURL]];
     });
     return request;
 }

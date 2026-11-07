@@ -2,6 +2,8 @@
 
 // URL and header rules, shared by the tweak and tests/rules.m.
 
+static NSString *const DNTEmptyJSONURL = @"data:application/json,%7B%7D";
+
 static inline BOOL DNTStringIsDigits(NSString *string) {
     return string.length && [string rangeOfCharacterFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]].location == NSNotFound;
 }
