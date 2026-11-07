@@ -7,23 +7,36 @@ name: Build
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   dylib:
     name: Build dylib
     runs-on: macos-latest
     env:
       THEOS: /tmp/theos
+      THEOS_COMMIT: 8167f59de02fd32cf45b16bfcb1330dfa5c9974c
       THEOS_PACKAGE_SCHEME: ""
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Test URL rules
+        run: |
+          clang -fobjc-arc -framework Foundation -I. tests/rules.m -o "$RUNNER_TEMP/rules"
+          "$RUNNER_TEMP/rules"
 
       - name: Install dependencies
         run: brew install ldid
 
-      - name: Clone Theos
-        run: git clone --recursive --depth 1 https://github.com/theos/theos.git "$THEOS"
+      - name: Fetch Theos
+        run: |
+          git init -q "$THEOS"
+          git -C "$THEOS" fetch -q --depth 1 https://github.com/theos/theos.git "$THEOS_COMMIT"
+          git -C "$THEOS" checkout -q FETCH_HEAD
+          git -C "$THEOS" submodule update -q --init --recursive
 
       - name: Build tweak
         run: |
@@ -41,7 +54,7 @@ jobs:
           otool -L "DiscordNoTrack.dylib"
 
       - name: Upload dylib
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: DiscordNoTrack-dylib
           path: |

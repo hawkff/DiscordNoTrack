@@ -4,5 +4,4 @@ packages/
 .DS_Store
 ._*
 
-architecture.md
 *.dylib
