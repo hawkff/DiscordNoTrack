@@ -38,6 +38,14 @@ jobs:
           git -C "$THEOS" checkout -q FETCH_HEAD
           git -C "$THEOS" submodule update -q --init --recursive
 
+      # Runs the tweak's hooks on macOS: the same Logos output, built as a host dylib.
+      - name: Test hooks
+        run: |
+          "$THEOS/bin/logos.pl" DiscordNoTrack.xm > "$RUNNER_TEMP/tweak.mm"
+          clang++ -fobjc-arc -I. -dynamiclib -framework Foundation "$RUNNER_TEMP/tweak.mm" -o "$RUNNER_TEMP/tweak.dylib"
+          clang -fobjc-arc -framework Foundation -I. tests/hooks.m -o "$RUNNER_TEMP/hooks"
+          "$RUNNER_TEMP/hooks" "$RUNNER_TEMP/tweak.dylib"
+
       - name: Build tweak
         run: |
           make clean

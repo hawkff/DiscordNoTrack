@@ -145,34 +145,13 @@ static BOOL DNTClassExists(NSString *className) {
 %end
 %end
 
-// sentry
-%group DNTSentrySDK
-%hook SentrySDK
-+ (BOOL)isEnabled { return NO; }
-%end
-%end
-
-%group DNTSentryOptions
+// sentry: Discord reads SentrySDK.crashedLastRun at launch, so the SDK starts with only its crash handler and drops every event.
+%group DNTSentry
 %hook SentryOptions
 - (BOOL)enabled { return NO; }
-- (BOOL)isTracingEnabled { return NO; }
-- (BOOL)isProfilingEnabled { return NO; }
 - (void)setEnabled:(BOOL)a { %orig(NO); }
-%end
-%end
-
-%group DNTSentryClient
-%hook SentryClient
-- (BOOL)isEnabled { return NO; }
-%end
-%end
-
-%group DNTSentryNetworkTracker
-%hook SentryNetworkTracker
-- (BOOL)isNetworkTrackingEnabled { return NO; }
-- (BOOL)isNetworkBreadcrumbEnabled { return NO; }
-- (void)setIsNetworkTrackingEnabled:(BOOL)a { %orig(NO); }
-- (void)setIsNetworkBreadcrumbEnabled:(BOOL)a { %orig(NO); }
+- (BOOL)isTracingEnabled { return NO; }
+- (NSArray *)integrations { return @[@"SentryCrashIntegration"]; }
 %end
 %end
 
@@ -187,17 +166,8 @@ static BOOL DNTClassExists(NSString *className) {
         if (DNTClassExists(@"AppsFlyerLib")) {
             %init(DNTAppsFlyer);
         }
-        if (DNTClassExists(@"SentrySDK")) {
-            %init(DNTSentrySDK);
-        }
         if (DNTClassExists(@"SentryOptions")) {
-            %init(DNTSentryOptions);
-        }
-        if (DNTClassExists(@"SentryClient")) {
-            %init(DNTSentryClient);
-        }
-        if (DNTClassExists(@"SentryNetworkTracker")) {
-            %init(DNTSentryNetworkTracker);
+            %init(DNTSentry);
         }
     }
 }
