@@ -6,11 +6,13 @@ DiscordNoTrack is an iOS tweak that blocks telemetry in the Discord app. It runs
 
 - Discord's analytics endpoints `/api/v*/science`, `/api/v*/metrics`, `/api/v*/metrics/v2` and `/api/v*/beaker`. Discord gets an empty success response, so it treats the events as sent and doesn't retry them.
 - AppsFlyer. The tweak sets the SDK's `isStopped` switch and blocks `appsflyersdk.com` and `appsflyer.com`. AppsFlyer deferred deep links stop working.
-- The native Sentry SDK, which also carries Discord's JavaScript crash reports. Discord reads the SDK's crash flag at launch, so the tweak lets Sentry start with its crash handler alone. Sentry then drops every event, and the tweak blocks `sentry.io`.
+- The native Sentry SDK, which also carries Discord's JavaScript crash reports. Discord reads the SDK's crash flag at launch, so the tweak lets Sentry start with its crash handler alone. Sentry then drops every event. The tweak blocks `sentry.io` and stops the SDK's connectivity check, which looks up `sentry.io` at each start.
 - The hosts of SDKs that older Discord builds shipped: Adjust, Firebase Analytics, Firebase logging and Crashlytics.
 - `sentry-trace` and `baggage` headers on every other request.
 
-Discord 332, 344.1 and 352.1 ship AppsFlyer 6.17.8 and Sentry Cocoa 8.58.0, the versions these hooks target. On a device running Discord 352.1, an HTTPS proxy recorded no request to any of these endpoints or hosts.
+The endpoint and host rules also cover requests that skip React Native's networking, such as Swift code that calls `URLSession` directly. Discord 352.1 links NitroFetch, a library that sends that way.
+
+Discord 332, 344.1 and 352.1 ship AppsFlyer 6.17.8 and Sentry Cocoa 8.58.0, the versions these hooks target. On devices running Discord 344.1 and 352.1, an HTTPS proxy recorded no request to any of these endpoints or hosts.
 
 ## Install
 
