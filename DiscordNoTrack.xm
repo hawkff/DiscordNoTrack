@@ -197,6 +197,11 @@ static id DNTWithProtocol(NSURLSessionConfiguration *configuration) {
 - (BOOL)isTracingEnabled { return NO; }
 - (NSArray *)integrations { return @[@"SentryCrashIntegration"]; }
 %end
+
+// The first observer makes Sentry resolve sentry.io to watch connectivity, once per start.
+%hook SentryReachability
+- (void)addObserver:(id)observer {}
+%end
 %end
 
 %ctor {

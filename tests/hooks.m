@@ -34,6 +34,14 @@
 - (BOOL)isTracingEnabled { return YES; }
 @end
 
+@interface SentryReachability : NSObject
+@property (nonatomic) BOOL observed;
+- (void)addObserver:(id)observer;
+@end
+@implementation SentryReachability
+- (void)addObserver:(id)observer { _observed = YES; }
+@end
+
 static BOOL DNTIsBlocked(NSURLSessionTask *task) {
     return [task.currentRequest.URL.host isEqualToString:@"0.0.0.0"];
 }
@@ -101,6 +109,9 @@ int main(int argc, char **argv) {
         options.integrations = @[@"SentryCrashIntegration", @"SentryANRTrackingIntegration"];
         assert(![options isTracingEnabled]);
         assert([options.integrations isEqualToArray:@[@"SentryCrashIntegration"]]);
+        SentryReachability *reachability = [SentryReachability new];
+        [reachability addObserver:options];
+        assert(!reachability.observed);
 
         // The URL protocol answers loads that no hook rewrites. If it misses one, the science URL is local
         // and the tracker load meets a dead local proxy.
