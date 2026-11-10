@@ -163,6 +163,7 @@ static id DNTWithProtocol(NSURLSessionConfiguration *configuration) {
 %end
 %end
 
+// Background sessions ignore protocol classes, so the NSURLSession hooks above stay.
 %group DNTSessionConfiguration
 %hook NSURLSessionConfiguration
 + (id)defaultSessionConfiguration { return DNTWithProtocol(%orig); }

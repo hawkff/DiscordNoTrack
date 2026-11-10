@@ -109,6 +109,10 @@ int main(int argc, char **argv) {
         NSURLSessionConfiguration *configuration = NSURLSessionConfiguration.defaultSessionConfiguration;
         assert(configuration.protocolClasses.firstObject == protocol);
         assert(NSURLSessionConfiguration.ephemeralSessionConfiguration.protocolClasses.firstObject == protocol);
+        // It must leave alone an ordinary API request and the two requests the hooks substitute.
+        assert(![protocol canInitWithRequest:api]);
+        assert(![protocol canInitWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:DNTEmptyJSONURL]]]);
+        assert(![protocol canInitWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://0.0.0.0/"]]]);
 
         NSData *emptyJSON = [@"{}" dataUsingEncoding:NSUTF8StringEncoding];
         DNTLoad(session, @"http://127.0.0.1:9/api/v9/science", ^(NSData *data, NSURLResponse *response, NSError *error) {
