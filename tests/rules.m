@@ -17,6 +17,8 @@ int main(void) {
         assert(!DNTIsDiscordTelemetryPath(@"/api/v9/channels/1/messages"));
         assert(!DNTIsDiscordTelemetryPath(@"/api/v9"));
         assert(!DNTIsDiscordTelemetryPath(@"/api/vx/science"));
+        assert(!DNTIsDiscordTelemetryPath(@"/api/"));
+        assert(!DNTIsDiscordTelemetryPath(@"/apiary/science"));
         assert(!DNTIsDiscordTelemetryPath(@"/science"));
         assert(!DNTIsDiscordTelemetryPath(@"api/v9/science"));
         assert(!DNTIsDiscordTelemetryPath(nil));
@@ -24,7 +26,9 @@ int main(void) {
         assert(DNTIsTrackerURL(@"https://launches.appsflyersdk.com/api/v6.17/iosevent?app_id=1"));
         assert(DNTIsTrackerURL(@"https://o64374.ingest.sentry.io/api/230973/envelope/"));
         assert(DNTIsTrackerURL(@"https://SENTRY.IO/"));
+        assert(DNTIsTrackerURL(@"https://launches.appsflyersdk.com./"));
         assert(!DNTIsTrackerURL(@"https://notsentry.io/"));
+        assert(!DNTIsTrackerURL(@"https://sentry.io.example.com/"));
         assert(!DNTIsTrackerURL(@"https://discord.com/api/v9/science"));
         assert(!DNTIsTrackerURL(@"https://codeberg.org/raincord/rain/releases/download/latest/rain.98.hbc"));
         assert(!DNTIsTrackerURL(@"data:application/json,%7B%7D"));
@@ -32,6 +36,7 @@ int main(void) {
         assert(DNTIsTelemetryHeaderName(@"Sentry-Trace"));
         assert(DNTIsTelemetryHeaderName(@"baggage"));
         assert(!DNTIsTelemetryHeaderName(@"Authorization"));
+        assert(!DNTIsTelemetryHeaderName(nil));
         NSDictionary<NSString *, NSString *> *headers = @{@"Authorization": @"token", @"sentry-trace": @"1", @"Baggage": @"2"};
         assert([DNTWithoutTelemetryHeaders(headers) isEqualToDictionary:@{@"Authorization": @"token"}]);
         NSDictionary<NSString *, NSString *> *clean = @{@"Accept": @"*/*"};
