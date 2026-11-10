@@ -50,6 +50,42 @@ static BOOL DNTClassExists(NSString *className) {
     return exists;
 }
 
+// Answers the requests no hook below sees: Swift's async URLSession methods, which NitroFetch uses, and the unhooked task methods.
+@interface DNTURLProtocol : NSURLProtocol
+@end
+
+@implementation DNTURLProtocol
++ (BOOL)canInitWithRequest:(NSURLRequest *)request {
+    return DNTIsTrackerHost(request.URL) || DNTIsDiscordTelemetryPath(request.URL.path);
+}
+
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
+    return request;
+}
+
+- (void)startLoading {
+    NSURL *url = self.request.URL;
+    DNTLog(@"answering without the network: %@%@", url.host, url.path);
+    if (DNTIsTrackerHost(url)) {
+        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotConnectToHost userInfo:nil]];
+        return;
+    }
+    // A real HTTP response, since Swift callers such as NitroFetch reject anything that is not an HTTPURLResponse.
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:url statusCode:200 HTTPVersion:@"HTTP/1.1" headerFields:@{@"Content-Type": @"application/json"}];
+    [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+    [self.client URLProtocol:self didLoadData:[@"{}" dataUsingEncoding:NSUTF8StringEncoding]];
+    [self.client URLProtocolDidFinishLoading:self];
+}
+
+- (void)stopLoading {
+}
+@end
+
+static id DNTWithProtocol(NSURLSessionConfiguration *configuration) {
+    configuration.protocolClasses = [@[DNTURLProtocol.class] arrayByAddingObjectsFromArray:configuration.protocolClasses];
+    return configuration;
+}
+
 // main discord endpoints
 %group DNTDiscordNetworking
 %hook RCTHTTPRequestHandler
@@ -127,6 +163,13 @@ static BOOL DNTClassExists(NSString *className) {
 %end
 %end
 
+%group DNTSessionConfiguration
+%hook NSURLSessionConfiguration
++ (id)defaultSessionConfiguration { return DNTWithProtocol(%orig); }
++ (id)ephemeralSessionConfiguration { return DNTWithProtocol(%orig); }
+%end
+%end
+
 // appsflyer: isStopped is the SDK's documented opt-out
 %group DNTAppsFlyer
 %hook AppsFlyerLib
@@ -159,6 +202,9 @@ static BOOL DNTClassExists(NSString *className) {
     @autoreleasepool {
         %init(DNTRequestHeaderMutation);
         %init(DNTURLSession);
+        // The shared session uses registered classes. Every other session reads them from its configuration.
+        [NSURLProtocol registerClass:DNTURLProtocol.class];
+        %init(DNTSessionConfiguration);
 
         if (DNTClassExists(@"RCTHTTPRequestHandler")) {
             %init(DNTDiscordNetworking);
