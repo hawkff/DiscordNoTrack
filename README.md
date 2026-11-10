@@ -6,7 +6,7 @@ DiscordNoTrack is an iOS tweak that blocks telemetry in the Discord app. It runs
 
 - Discord's analytics endpoints `/api/v*/science`, `/api/v*/metrics`, `/api/v*/metrics/v2` and `/api/v*/beaker`. Discord gets an empty success response, so it treats the events as sent and doesn't retry them.
 - AppsFlyer. The tweak sets the SDK's `isStopped` switch and blocks `appsflyersdk.com` and `appsflyer.com`. AppsFlyer deferred deep links stop working.
-- The native Sentry SDK, which also carries Discord's JavaScript crash reports. The tweak turns it off and blocks `sentry.io`.
+- The native Sentry SDK, which also carries Discord's JavaScript crash reports. Discord reads the SDK's crash flag at launch, so the tweak lets Sentry start with its crash handler alone. Sentry then drops every event, and the tweak blocks `sentry.io`.
 - The hosts of SDKs that older Discord builds shipped: Adjust, Firebase Analytics, Firebase logging and Crashlytics.
 - `sentry-trace` and `baggage` headers on every other request.
 
