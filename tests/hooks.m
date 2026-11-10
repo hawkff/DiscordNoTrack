@@ -71,19 +71,24 @@ int main(int argc, char **argv) {
         [mutable addValue:@"3" forHTTPHeaderField:@"Baggage"];
         assert([mutable.allHTTPHeaderFields isEqualToDictionary:@{@"Accept": @"*/*"}]);
 
+        // KVC with the ivar's name reads and writes it without the hooked accessors, so a getter and a setter can't cover for each other.
         AppsFlyerLib *appsFlyer = [AppsFlyerLib new];
+        assert(appsFlyer.isStopped);
+        appsFlyer.isStopped = NO;
+        assert([[appsFlyer valueForKey:@"_isStopped"] boolValue]);
+        appsFlyer = [AppsFlyerLib new];
         [appsFlyer start];
         assert(appsFlyer.startedWhileStopped);
         appsFlyer = [AppsFlyerLib new];
         [appsFlyer startWithCompletionHandler:nil];
         assert(appsFlyer.startedWhileStopped);
-        appsFlyer.isStopped = NO;
-        assert(appsFlyer.isStopped);
 
         SentryOptions *options = [SentryOptions new];
-        options.enabled = YES;
-        options.integrations = @[@"SentryCrashIntegration", @"SentryANRTrackingIntegration"];
+        [options setValue:@YES forKey:@"_enabled"];
         assert(!options.enabled);
+        options.enabled = YES;
+        assert(![[options valueForKey:@"_enabled"] boolValue]);
+        options.integrations = @[@"SentryCrashIntegration", @"SentryANRTrackingIntegration"];
         assert(![options isTracingEnabled]);
         assert([options.integrations isEqualToArray:@[@"SentryCrashIntegration"]]);
     }
