@@ -9,6 +9,7 @@ static inline BOOL DNTStringIsDigits(NSString *string) {
 }
 
 // Discord's own matcher is \/api(\/v\d+)?\/science, so the version segment is optional.
+// The host is not checked on purpose, so the rule covers every host Discord serves its API from.
 static inline BOOL DNTIsDiscordTelemetryPath(NSString *path) {
     if (![path hasPrefix:@"/api/"]) { return NO; }
     NSArray<NSString *> *parts = [path componentsSeparatedByString:@"/"];

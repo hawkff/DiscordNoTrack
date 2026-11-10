@@ -109,6 +109,8 @@ int main(int argc, char **argv) {
         NSURLSessionConfiguration *configuration = NSURLSessionConfiguration.defaultSessionConfiguration;
         assert(configuration.protocolClasses.firstObject == protocol);
         assert(NSURLSessionConfiguration.ephemeralSessionConfiguration.protocolClasses.firstObject == protocol);
+        assert([protocol canInitWithRequest:request]);
+        assert([protocol canInitWithRequest:science]);
         // It must leave alone an ordinary API request and the two requests the hooks substitute.
         assert(![protocol canInitWithRequest:api]);
         assert(![protocol canInitWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:DNTEmptyJSONURL]]]);
